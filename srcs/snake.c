@@ -1,13 +1,18 @@
 # include "snake.h"
 
-struct snake_s {
-	SDL_Window* window;
-	SDL_Texture* texture;
-	SDL_Renderer* renderer;
-	unsigned int pixels[MapWidth * MapHeight];
+Snake game;
 
-	bool quit;
-} game;
+static void init() {
+
+}
+
+static void render() {
+	
+}
+
+static void update() {
+
+}
 
 int main() {
 	ASSERT(!SDL_Init(SDL_INIT_VIDEO),
@@ -31,6 +36,7 @@ int main() {
 						MapWidth, MapHeight);
 	ASSERT(game.texture, "Failed to create SDL texture: %s\n", SDL_GetError());
 
+	init();
 	while (!game.quit) {
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
@@ -41,12 +47,13 @@ int main() {
 			}
 		}
 
-		const char *keyState = SDL_GetKeyboardState(NULL);
+		const u8 *keyState = SDL_GetKeyboardState(NULL);
 
 		if (keyState[SDL_SCANCODE_ESCAPE])
 			game.quit = true;
 
-		game.pixels[155 * 25] = PINK;
+		update();
+		render();
 
 		SDL_UpdateTexture(game.texture, NULL, game.pixels, MapWidth * 4);
 		SDL_RenderCopyEx(
