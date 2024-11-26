@@ -5,6 +5,7 @@
 
 # define BLUE 0xFF0000
 # define GREEN 0x00FF00
+# define DGREEN 0x006400
 # define RED 0x0000FF
 # define BLACK 0x000000
 # define WHITE 0xFFFFFF

@@ -15,8 +15,9 @@
 # define MapWidth 384
 # define MapHeight 216
 
-// Boolean
+// MACROS
 typedef enum { false, true } bool;
+typedef struct { float x, y; } vec2;
 
 // Debug
 # define ASSERT(_c, ...) if (!(_c)) { fprintf(stderr, __VA_ARGS__); exit(1); }

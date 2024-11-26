@@ -3,15 +3,15 @@
 Snake game;
 
 static void init() {
-
+	bodyInit(16, GREEN, DGREEN);
 }
 
 static void render() {
-	
+	bodyRender();
 }
 
 static void update() {
-
+	bodyUpdate();
 }
 
 int main() {
@@ -51,6 +51,8 @@ int main() {
 
 		if (keyState[SDL_SCANCODE_ESCAPE])
 			game.quit = true;
+
+		bzero(game.pixels, sizeof(game.pixels));
 
 		update();
 		render();

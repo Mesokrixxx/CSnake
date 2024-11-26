@@ -4,4 +4,6 @@
 # include "svars.h"
 # include "graphics.h"
 
+# include "body.h"
+
 #endif
