@@ -21,9 +21,20 @@ void bodyInit(int drawSize, u32 headColor, u32 bodyColor) {
 }
 
 void bodyUpdate() {
-	if (body->type) {
-		// TODO
+	static int time;
+	int bdrawSize = body->drawSize;
+	vec2 bdir = body->dir;
+
+	if (time > 50) {
+		time = 0;
+
+		if (body->type) {
+			body->position.x += bdrawSize * bdir.x;
+			body->position.y += bdrawSize * bdir.y;
+		}
 	}
+	else
+		time += 1;
 }
 
 void bodyRender() {
