@@ -41,7 +41,7 @@ static inline bool		vec2is_contains(t_vec2i *vecs, size_t n, t_vec2i v) {
 }
 
 typedef struct {
-	t_vec2i	dir;
+	t_vec2i	dir, dirNext;
 	t_vec2i	*body;
 	t_vec2i headpos;
 	size_t	bufcap, bufsize;
@@ -91,29 +91,24 @@ void	snake_push(t_snake *snake, t_vec2i pos) {
 	snake->bufsize++;
 }
 
-// TODO: @fix turning isn't well responding and fast turning can kill the snake
-void	event_keydown_handle(t_state *state, SDL_Event ev) {
-	switch (ev.key.keysym.scancode) {
-		case (SDL_SCANCODE_W):
-		case (SDL_SCANCODE_S):
-			if (state->snake.dir.y)
-				break ;
-			state->snake.dir = 
+void	input_process(t_state *state) {
+	const uint8_t *keys = SDL_GetKeyboardState(NULL);
+	
+	if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_S]) {
+		if (!state->snake.dir.y) {
+			state->snake.dirNext = 
 				vec2i(
 					0,
-					ev.key.keysym.scancode == SDL_SCANCODE_W ? 1 : -1);
-			break ;
-		case (SDL_SCANCODE_A):
-		case (SDL_SCANCODE_D):
-			if (state->snake.dir.x)
-				break ;
-			state->snake.dir = 
+					keys[SDL_SCANCODE_W] ? 1 : -1);
+		}
+	}
+	if (keys[SDL_SCANCODE_D] || keys[SDL_SCANCODE_A]) {
+		if (!state->snake.dir.x) {
+			state->snake.dirNext = 
 				vec2i(
-					ev.key.keysym.scancode == SDL_SCANCODE_D ? 1 : -1,
+					keys[SDL_SCANCODE_D] ? 1 : -1,
 					0);
-			break ;
-		default:
-			break ;
+		}
 	}
 }
 
@@ -150,6 +145,7 @@ int	main(void) {
 	state.snake.body = malloc(sizeof(t_vec2i) * state.snake.bufcap);
 	ASSERT(state.snake.body, NULL);
 	state.snake.dir = vec2i(1, 0);
+	state.snake.dirNext = state.snake.dir;
 	state.snake.bufsize = 1;
 	state.snake.body[0] = vec2i(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 	state.snake.headpos = state.snake.body[0];
@@ -178,19 +174,17 @@ int	main(void) {
 				case (SDL_QUIT):
 					state.running = false;
 					break ;
-				case (SDL_KEYDOWN):
-					event_keydown_handle(&state, ev);
-					break ;
 				default:
 					break ;
 			}
 		}
+		input_process(&state);
 
 		if (frameCurr && elapsed < (1000.0 / state.tps))
 			continue ;
 		elapsed = 0;
 
-		t_vec2i nextPos = vec2i_adds(state.snake.headpos, state.snake.dir);
+		t_vec2i nextPos = vec2i_adds(state.snake.headpos, state.snake.dirNext);
 		if (vec2i_eq(nextPos, state.food)) {
 			state.food = 
 				vec2i(
@@ -216,6 +210,7 @@ int	main(void) {
 			pixel_set(state.pixels, state.snake.body[state.snake.bufsize - 1], 0);
 			state.snake.bufsize--;
 		}
+		state.snake.dir = state.snake.dirNext;
 
 		SDL_UpdateTexture(state.texture, NULL, state.pixels, MAP_WIDTH * 4);
 		SDL_RenderCopyEx(
