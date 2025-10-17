@@ -117,9 +117,11 @@ void	food_spawn(t_state *state) {
 		vec2i(
 			MAP_WIDTH * ((double)rand() / RAND_MAX),
 			MAP_HEIGHT * ((double)rand() / RAND_MAX));
-	if (vec2is_contains(state->snake.body, state->snake.bufsize, state->food)) {
-		food_spawn(state);
-		return ;
+	while (vec2is_contains(state->snake.body, state->snake.bufsize, state->food)) {
+		state->food = 
+			vec2i(
+				MAP_WIDTH * ((double)rand() / RAND_MAX),
+				MAP_HEIGHT * ((double)rand() / RAND_MAX));
 	}
 	pixel_set(state->pixels, state->food, 0xFF0000FF);
 }
@@ -193,21 +195,20 @@ int	main(void) {
 		elapsed = 0;
 
 		t_vec2i nextPos = vec2i_adds(state.snake.headpos, state.snake.dirNext);
-		if (vec2i_eq(nextPos, state.food)) {
-			food_spawn(&state);
-			snake_push(&state.snake, nextPos);
-			pixel_set(state.pixels, state.snake.headpos, 0x00FF00FF);
-			state.tps += 0.33;
-		} else if (vec2is_contains(state.snake.body, state.snake.bufsize, nextPos)) {
+		if (vec2is_contains(state.snake.body, state.snake.bufsize, nextPos)) {
 			printf("Snake collided with itself\n");
 			state.running = false;
 			break ;
-		} else if (
-				!(nextPos.x >= 0 && nextPos.x < MAP_WIDTH)
+		} else if (!(nextPos.x >= 0 && nextPos.x < MAP_WIDTH)
 				|| !(nextPos.y >= 0 && nextPos.y < MAP_HEIGHT)) {
 			printf("Snake out of bounds\n");
 			state.running = false;
 			break ;
+		} else if (vec2i_eq(nextPos, state.food)) {
+			food_spawn(&state);
+			snake_push(&state.snake, nextPos);
+			pixel_set(state.pixels, state.snake.headpos, 0x00FF00FF);
+			state.tps += 0.33;
 		} else {
 			snake_push(&state.snake, nextPos);
 			pixel_set(state.pixels, nextPos, 0x00FF00FF);
