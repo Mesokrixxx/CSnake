@@ -1,4 +1,4 @@
 # A Simple Snake game made in C
 
-### v0
-> Hello, World!
+### v1
+> Minimal Snake game implementation
