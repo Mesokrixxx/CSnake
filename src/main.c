@@ -6,7 +6,6 @@
 
 #define MAP_WIDTH 60
 #define MAP_HEIGHT 34
-#define TPS 5
 
 #define ASSERT(_expr, _log)				\
 	do {								\
@@ -55,6 +54,7 @@ typedef struct {
 	uint32_t		pixels[MAP_WIDTH * MAP_HEIGHT];
 	t_snake			snake;
 	t_vec2i			food;
+	double			tps;
 	bool			running;
 }	t_state;
 
@@ -91,6 +91,7 @@ void	snake_push(t_snake *snake, t_vec2i pos) {
 	snake->bufsize++;
 }
 
+// TODO: @fix turning isn't well responding and fast turning can kill the snake
 void	event_keydown_handle(t_state *state, SDL_Event ev) {
 	switch (ev.key.keysym.scancode) {
 		case (SDL_SCANCODE_W):
@@ -143,6 +144,8 @@ int	main(void) {
 			MAP_WIDTH, MAP_HEIGHT);
 	ASSERT(state.texture, SDL_GetError());
 
+	state.tps = 5.0;
+
 	state.snake.bufcap = 32;
 	state.snake.body = malloc(sizeof(t_vec2i) * state.snake.bufcap);
 	ASSERT(state.snake.body, NULL);
@@ -183,7 +186,7 @@ int	main(void) {
 			}
 		}
 
-		if (frameCurr && elapsed < (1000.0 / TPS))
+		if (frameCurr && elapsed < (1000.0 / state.tps))
 			continue ;
 		elapsed = 0;
 
@@ -196,6 +199,7 @@ int	main(void) {
 			pixel_set(state.pixels, state.food, 0xFF0000FF);
 			snake_push(&state.snake, nextPos);
 			pixel_set(state.pixels, state.snake.headpos, 0x00FF00FF);
+			state.tps += 0.33;
 		} else if (vec2is_contains(state.snake.body, state.snake.bufsize, nextPos)) {
 			printf("Snake collided with itself\n");
 			state.running = false;
