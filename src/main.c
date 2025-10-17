@@ -1,4 +1,6 @@
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -92,7 +94,7 @@ void	snake_push(t_snake *snake, t_vec2i pos) {
 }
 
 void	input_process(t_state *state) {
-	const uint8_t *keys = SDL_GetKeyboardState(NULL);
+	const bool *keys = SDL_GetKeyboardState(NULL);
 	
 	if (keys[SDL_SCANCODE_W] || keys[SDL_SCANCODE_S]) {
 		if (!state->snake.dir.y) {
@@ -114,36 +116,38 @@ void	input_process(t_state *state) {
 
 void	food_spawn(t_state *state) {
 	state->food = 
-		vec2i(
-			MAP_WIDTH * ((double)rand() / RAND_MAX),
-			MAP_HEIGHT * ((double)rand() / RAND_MAX));
+		vec2i(SDL_rand(MAP_WIDTH), SDL_rand(MAP_HEIGHT));
 	while (vec2is_contains(state->snake.body, state->snake.bufsize, state->food)) {
 		state->food = 
-			vec2i(
-				MAP_WIDTH * ((double)rand() / RAND_MAX),
-				MAP_HEIGHT * ((double)rand() / RAND_MAX));
+			vec2i(SDL_rand(MAP_WIDTH), SDL_rand(MAP_HEIGHT));
 	}
 	pixel_set(state->pixels, state->food, 0xFF0000FF);
+}
+
+void present(t_state *state) {
+	SDL_UpdateTexture(state->texture, NULL, state->pixels, MAP_WIDTH * 4);
+	SDL_RenderTextureRotated(
+		state->renderer, 
+		state->texture, 
+		NULL, NULL, 
+		0, NULL, 
+		SDL_FLIP_VERTICAL);
+	SDL_RenderPresent(state->renderer);
 }
 
 int	main(void) {
 	t_state state = {0};
 
-	ASSERT(!SDL_Init(SDL_INIT_VIDEO), SDL_GetError());
+	ASSERT(SDL_Init(SDL_INIT_VIDEO), SDL_GetError());
 
 	state.window =
 		SDL_CreateWindow(
 			"CSnake", 
-			SDL_WINDOWPOS_CENTERED_DISPLAY(1), 
-			SDL_WINDOWPOS_CENTERED_DISPLAY(1), 
 			1080, 720, 
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+			SDL_WINDOW_RESIZABLE);
 	ASSERT(state.window, SDL_GetError());
 
-	state.renderer = 
-		SDL_CreateRenderer(
-			state.window,
-			-1, SDL_RENDERER_ACCELERATED);
+	state.renderer = SDL_CreateRenderer(state.window, NULL);
 	ASSERT(state.renderer, SDL_GetError());
 
 	state.texture = 
@@ -151,6 +155,7 @@ int	main(void) {
 			state.renderer,
 			SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
 			MAP_WIDTH, MAP_HEIGHT);
+	SDL_SetTextureScaleMode(state.texture, SDL_SCALEMODE_NEAREST);
 	ASSERT(state.texture, SDL_GetError());
 
 	state.tps = 5.0;
@@ -163,8 +168,6 @@ int	main(void) {
 	state.snake.bufsize = 1;
 	state.snake.body[0] = vec2i(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 	state.snake.headpos = state.snake.body[0];
-
-	srand(time(NULL));
 
 	food_spawn(&state);
 
@@ -181,8 +184,12 @@ int	main(void) {
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev)) {
 			switch (ev.type) {
-				case (SDL_QUIT):
+				case (SDL_EVENT_QUIT):
 					state.running = false;
+					break ;
+				case (SDL_EVENT_WINDOW_RESIZED):
+					SDL_RenderClear(state.renderer);
+					present(&state);
 					break ;
 				default:
 					break ;
@@ -212,19 +219,12 @@ int	main(void) {
 		} else {
 			snake_push(&state.snake, nextPos);
 			pixel_set(state.pixels, nextPos, 0x00FF00FF);
-			pixel_set(state.pixels, state.snake.body[state.snake.bufsize - 1], 0);
+			pixel_set(state.pixels, state.snake.body[state.snake.bufsize - 1], 0x000000FF);
 			state.snake.bufsize--;
 		}
 		state.snake.dir = state.snake.dirNext;
 
-		SDL_UpdateTexture(state.texture, NULL, state.pixels, MAP_WIDTH * 4);
-		SDL_RenderCopyEx(
-			state.renderer, 
-			state.texture, 
-			NULL, NULL, 
-			0, NULL, 
-			SDL_FLIP_VERTICAL);
-		SDL_RenderPresent(state.renderer);
+		present(&state);
 	}
 
 	free(state.snake.body);

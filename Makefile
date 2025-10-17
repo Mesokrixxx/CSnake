@@ -1,7 +1,7 @@
 EXEC = Snake
 
 CFLAGS = -Wall -Wextra -Wpedantic
-LDFLAGS = -lSDL2
+LDFLAGS = -lSDL3
 
 SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
