@@ -10,18 +10,18 @@
 #define MAP_HEIGHT 34
 
 #define ASSERT(_expr, _log)				\
-	do {								\
+	do {						\
 		const char *__log = _log;		\
-		if (!(_expr)) {					\
-			fprintf(stderr,				\
+		if (!(_expr)) {				\
+			fprintf(stderr,			\
 				"[ASSERTION FAILED]"	\
 				"[%s:%d][%s]\n%s%s",	\
-				__FILE__, __LINE__,		\
-				#_expr,					\
-				__log ? __log : "",		\
-				__log ? "\n" : "");		\
-			exit(1);					\
-		}								\
+				__FILE__, __LINE__,	\
+				#_expr,			\
+				__log ? __log : "",	\
+				__log ? "\n" : "");	\
+			exit(1);			\
+		}					\
 	} while (0)
 
 typedef union {
@@ -34,8 +34,8 @@ typedef union {
 
 static inline t_vec2i	vec2i(int x, int y) { return (t_vec2i){{ x, y }}; }
 static inline t_vec2i	vec2i_adds(t_vec2i v1, t_vec2i v2) { return (vec2i(v1.x + v2.x, v1.y + v2.y)); }
-static inline bool		vec2i_eq(t_vec2i v1, t_vec2i v2) { return (v1.x == v2.x && v1.y == v2.y); }
-static inline bool		vec2is_contains(t_vec2i *vecs, size_t n, t_vec2i v) {
+static inline bool	vec2i_eq(t_vec2i v1, t_vec2i v2) { return (v1.x == v2.x && v1.y == v2.y); }
+static inline bool	vec2is_contains(t_vec2i *vecs, size_t n, t_vec2i v) {
 	for (size_t i = 0; i < n; i++)
 		if (vec2i_eq(vecs[i], v))
 			return true;
@@ -50,14 +50,14 @@ typedef struct {
 }	t_snake;
 
 typedef struct {
-	SDL_Window		*window;
+	SDL_Window	*window;
 	SDL_Renderer	*renderer;
-	SDL_Texture		*texture;
-	uint32_t		pixels[MAP_WIDTH * MAP_HEIGHT];
-	t_snake			snake;
-	t_vec2i			food;
-	double			tps;
-	bool			running;
+	SDL_Texture	*texture;
+	uint32_t	pixels[MAP_WIDTH * MAP_HEIGHT];
+	t_snake		snake;
+	t_vec2i		food;
+	double		tps;
+	bool		running;
 }	t_state;
 
 static inline void	pixel_set(uint32_t *pixels, t_vec2i pos, uint32_t col) {
@@ -67,8 +67,8 @@ static inline void	pixel_set(uint32_t *pixels, t_vec2i pos, uint32_t col) {
 double	time_now(void) {
 	static uint64_t freq;
 	static uint64_t	start;
-	uint64_t		now;
-	uint64_t		diff;
+	uint64_t	now;
+	uint64_t	diff;
 
 	if (!freq)
 		freq = SDL_GetPerformanceFrequency();
@@ -187,10 +187,6 @@ int	main(void) {
 				case (SDL_EVENT_QUIT):
 					state.running = false;
 					break ;
-				case (SDL_EVENT_WINDOW_RESIZED):
-					SDL_RenderClear(state.renderer);
-					present(&state);
-					break ;
 				default:
 					break ;
 			}
@@ -200,6 +196,8 @@ int	main(void) {
 		if (frameCurr && elapsed < (1000.0 / state.tps))
 			continue ;
 		elapsed = 0;
+
+		SDL_RenderClear(state.renderer);	
 
 		t_vec2i nextPos = vec2i_adds(state.snake.headpos, state.snake.dirNext);
 		if (vec2is_contains(state.snake.body, state.snake.bufsize, nextPos)) {
