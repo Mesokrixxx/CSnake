@@ -1,6 +1,6 @@
-EXEC = Snake
+EXEC = CSnake
 
-CFLAGS = -Wall -Wextra -Wpedantic
+CFLAGS = -Wall -Wextra -Wpedantic -Ilib
 LDFLAGS = -lSDL3
 
 SRC = $(wildcard src/*.c)

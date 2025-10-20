@@ -1,0 +1,3 @@
+[submodule "lib/CLA"]
+	path = lib/CLA
+	url = git@github.com:Mesokrixxx/CLA

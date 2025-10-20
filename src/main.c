@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
+#include <CLA/CLA.h>
 
 #define MAP_WIDTH 60
 #define MAP_HEIGHT 34
@@ -23,24 +24,6 @@
 			exit(1);			\
 		}					\
 	} while (0)
-
-typedef union {
-	struct {
-		int x;
-		int y;
-	};
-	int raw[2];
-}	t_vec2i;
-
-static inline t_vec2i	vec2i(int x, int y) { return (t_vec2i){{ x, y }}; }
-static inline t_vec2i	vec2i_adds(t_vec2i v1, t_vec2i v2) { return (vec2i(v1.x + v2.x, v1.y + v2.y)); }
-static inline bool	vec2i_eq(t_vec2i v1, t_vec2i v2) { return (v1.x == v2.x && v1.y == v2.y); }
-static inline bool	vec2is_contains(t_vec2i *vecs, size_t n, t_vec2i v) {
-	for (size_t i = 0; i < n; i++)
-		if (vec2i_eq(vecs[i], v))
-			return true;
-	return false;
-}
 
 typedef struct {
 	t_vec2i	dir, dirNext;
@@ -199,7 +182,7 @@ int	main(void) {
 
 		SDL_RenderClear(state.renderer);	
 
-		t_vec2i nextPos = vec2i_adds(state.snake.headpos, state.snake.dirNext);
+		t_vec2i nextPos = vec2i_add(state.snake.headpos, state.snake.dirNext);
 		if (vec2is_contains(state.snake.body, state.snake.bufsize, nextPos)) {
 			printf("Snake collided with itself\n");
 			state.running = false;
